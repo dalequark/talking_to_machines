@@ -1,0 +1,361 @@
+{
+  "id": "7399c240-b8b4-42aa-8605-dd79d792c4de",
+  "name": "question-3.answer",
+  "auto": true,
+  "contexts": [
+    "question-3-followup"
+  ],
+  "responses": [
+    {
+      "resetContexts": false,
+      "affectedContexts": [],
+      "parameters": [
+        {
+          "id": "d84a4f09-481f-4110-a364-a023130faacb",
+          "required": true,
+          "dataType": "@sys.number",
+          "name": "answer",
+          "value": "$answer",
+          "prompts": [
+            "What's your answer? Remember to answer with a number."
+          ],
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "outputDialogContexts": [],
+          "isList": false
+        }
+      ],
+      "messages": [
+        {
+          "type": 0,
+          "condition": "",
+          "speech": "Your answer is $answer.original."
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": [],
+  "userSays": [
+    {
+      "id": "f8712738-7867-4f3b-b2e7-52bfa2cf9af5",
+      "data": [
+        {
+          "text": "There are ",
+          "userDefined": false
+        },
+        {
+          "text": "892347",
+          "alias": "answer",
+          "meta": "@sys.number",
+          "userDefined": false
+        },
+        {
+          "text": " things to think about.",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "5254bb98-a43a-4b4c-9e0a-8b61c91cf5d4",
+      "data": [
+        {
+          "text": "The number of x in a y is ",
+          "userDefined": false
+        },
+        {
+          "text": "81992",
+          "alias": "answer",
+          "meta": "@sys.number",
+          "userDefined": false
+        },
+        {
+          "text": ".",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "666863b2-a9d9-42c2-ab45-e92926a035d7",
+      "data": [
+        {
+          "text": "Benjamin Franklin",
+          "meta": "@sys.ignore",
+          "userDefined": false
+        },
+        {
+          "text": " was born in ",
+          "userDefined": false
+        },
+        {
+          "text": "389",
+          "alias": "answer",
+          "meta": "@sys.number",
+          "userDefined": true
+        },
+        {
+          "text": ".",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "522b9e9f-0358-4ad7-b2b0-06e658301291",
+      "data": [
+        {
+          "text": "I thought it was ",
+          "userDefined": false
+        },
+        {
+          "text": "82394",
+          "alias": "answer",
+          "meta": "@sys.number",
+          "userDefined": false
+        },
+        {
+          "text": ".",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "8ee08853-076c-4c42-9d5b-9f80a38bb993",
+      "data": [
+        {
+          "text": "Anything can go here, it just has to have a number ",
+          "userDefined": false
+        },
+        {
+          "text": "892",
+          "alias": "answer",
+          "meta": "@sys.number",
+          "userDefined": true
+        },
+        {
+          "text": ".",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "61ce28c9-1b66-4edc-a246-00e937441f79",
+      "data": [
+        {
+          "text": "8",
+          "alias": "answer",
+          "meta": "@sys.number",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "4e0e5ab9-4fa9-47db-b89d-388d34f0c58b",
+      "data": [
+        {
+          "text": "2839",
+          "alias": "answer",
+          "meta": "@sys.number",
+          "userDefined": false
+        },
+        {
+          "text": "!",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "6322fa82-47f4-4cbb-8628-e72b00c85600",
+      "data": [
+        {
+          "text": "The number is ",
+          "userDefined": false
+        },
+        {
+          "text": "839",
+          "alias": "answer",
+          "meta": "@sys.number",
+          "userDefined": false
+        },
+        {
+          "text": ".",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "692df36a-f8b4-43db-aaa7-a11dad3655c8",
+      "data": [
+        {
+          "text": "Is it ",
+          "userDefined": false
+        },
+        {
+          "text": "49",
+          "alias": "answer",
+          "meta": "@sys.number",
+          "userDefined": false
+        },
+        {
+          "text": "?",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "6d007f8b-32cd-4a87-86f1-b9e8d5b7fca8",
+      "data": [
+        {
+          "text": "I got it, it's ",
+          "userDefined": false
+        },
+        {
+          "text": "893",
+          "alias": "answer",
+          "meta": "@sys.number",
+          "userDefined": false
+        },
+        {
+          "text": ".",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "d48087f9-1a50-498d-bf9f-42d4ce72d3df",
+      "data": [
+        {
+          "text": "9823",
+          "alias": "answer",
+          "meta": "@sys.number",
+          "userDefined": false
+        },
+        {
+          "text": ".",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "c0980a41-0a77-477e-af24-34e11a8ae461",
+      "data": [
+        {
+          "text": "I don't know, is it ",
+          "userDefined": false
+        },
+        {
+          "text": "7289",
+          "alias": "answer",
+          "meta": "@sys.number",
+          "userDefined": true
+        },
+        {
+          "text": "?",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "d93101a5-c442-4507-8d70-4a9e10c87a8d",
+      "data": [
+        {
+          "text": "It's ",
+          "userDefined": false
+        },
+        {
+          "text": "11",
+          "alias": "answer",
+          "meta": "@sys.number",
+          "userDefined": true
+        },
+        {
+          "text": ".",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "a178f43d-f9e4-45fe-82e3-9e918eb1e427",
+      "data": [
+        {
+          "text": "The answer is ",
+          "userDefined": false
+        },
+        {
+          "text": "88",
+          "alias": "answer",
+          "meta": "@sys.number",
+          "userDefined": true
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    }
+  ],
+  "followUpIntents": [],
+  "liveAgentHandoff": false,
+  "endInteraction": false,
+  "conditionalResponses": [],
+  "condition": "",
+  "conditionalFollowupEvents": [],
+  "templates": []
+}

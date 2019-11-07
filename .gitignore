@@ -1,0 +1,5 @@
+*.wav
+__pycache__
+key.json
+venv
+.vscode

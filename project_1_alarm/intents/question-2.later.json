@@ -1,0 +1,337 @@
+{
+  "name": "question-2.later",
+  "auto": true,
+  "contexts": [
+    "question-2-followup"
+  ],
+  "responses": [
+    {
+      "resetContexts": false,
+      "affectedContexts": [],
+      "parameters": [],
+      "messages": [
+        {
+          "type": 0,
+          "condition": "",
+          "speech": []
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": [],
+  "userSays": [
+    {
+      "id": "7da2faec-ce96-46ed-88f9-a3d81c867c2f",
+      "data": [
+        {
+          "text": "exit",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "40937ad8-1c38-456c-b4b1-4f2d3cfb12b6",
+      "data": [
+        {
+          "text": "cancel",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "eff6e411-f7d4-4e5e-8c71-260ef502aef7",
+      "data": [
+        {
+          "text": "stop",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "94464053-4d43-4a85-ad49-19d33eae603e",
+      "data": [
+        {
+          "text": "quit",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "44ddf846-0524-4914-8071-644e1a6761cd",
+      "data": [
+        {
+          "text": "end",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 1,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "260647b8-19a7-4c04-bf35-890c702c7aea",
+      "data": [
+        {
+          "text": "shut up",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "7e44c824-8912-478e-94d5-77aba1cff862",
+      "data": [
+        {
+          "text": "Shhhh",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "7e0aa621-c4d6-4495-9f23-7c618d0e8028",
+      "data": [
+        {
+          "text": "Be quiet",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "630424a8-f449-484d-9331-bf3f2196b3d8",
+      "data": [
+        {
+          "text": "Silence the alarm",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "276bfd2f-47b2-4350-b2b0-b85c2a116f09",
+      "data": [
+        {
+          "text": "Can you snooze",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "9f90162b-35f9-4a93-be0b-c774173db430",
+      "data": [
+        {
+          "text": "Go to sleep",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "8bf56c0c-2dfd-4e52-8740-8c18f01bdb35",
+      "data": [
+        {
+          "text": "snooze",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "f95b1823-c2c7-4fcd-9207-23e6ea466899",
+      "data": [
+        {
+          "text": "do ",
+          "userDefined": false
+        },
+        {
+          "text": "it",
+          "meta": "@sys.ignore",
+          "userDefined": false
+        },
+        {
+          "text": " later",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "2d1e3d19-d567-4dff-975b-19d69917a91c",
+      "data": [
+        {
+          "text": "later",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 2,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "85bc2ece-cc49-41b8-9725-85477eeb59ae",
+      "data": [
+        {
+          "text": "I said later",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "d4ac2f21-46b6-4efc-8af8-282ade36edba",
+      "data": [
+        {
+          "text": "not yet",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 2,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "b52e6d5a-24f1-489f-bbb7-93087d92396d",
+      "data": [
+        {
+          "text": "some other time",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "15f20dc2-f195-43e7-b659-79576e75e91c",
+      "data": [
+        {
+          "text": "not at this time",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 1,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "821449ae-7bc9-47e4-8a5c-7c096032a29b",
+      "data": [
+        {
+          "text": "next time",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 1,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "97753c1e-c581-464d-915c-9ba5a025a36e",
+      "data": [
+        {
+          "text": "not at the moment",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 0,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "2780293c-6a37-439e-9bda-fe9009eeb2e0",
+      "data": [
+        {
+          "text": "ask me later",
+          "userDefined": false
+        }
+      ],
+      "isTemplate": false,
+      "count": 1,
+      "updated": 0,
+      "isAuto": false
+    },
+    {
+      "id": "4052fa15-b452-4f04-9eb1-bbb90668f415",
+      "data": [
+        {
+          "text": "not ",
+          "userDefined": false
+        },
+        {
+          "text": "right now",
+          "meta": "@sys.ignore",
+          "userDefined": true
+        }
+      ],
+      "isTemplate": false,
+      "count": 2,
+      "updated": 0,
+      "isAuto": false
+    }
+  ],
+  "followUpIntents": [],
+  "liveAgentHandoff": false,
+  "endInteraction": false,
+  "conditionalResponses": [],
+  "condition": "",
+  "conditionalFollowupEvents": [],
+  "templates": []
+}
