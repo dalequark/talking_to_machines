@@ -1,0 +1,138 @@
+const dialogflow = require('dialogflow');
+const common = require('@google-cloud/common');
+const record = require('node-record-lpcm16');
+const uuidv1 = require('uuid/v1');
+const pump = require('pump');
+const Transform = require('readable-stream').Transform;
+const fs = require('fs');
+const Speaker = require('speaker');
+const { PassThrough } = require('stream');
+
+const projectId = process.env.PROJECT_ID;
+const sessionClient = new dialogflow.SessionsClient();
+
+const encoding = "LINEAR16";
+const sampleRateHertz = 16000;
+const languageCode = "en-US";
+
+function makeInitialStreamRequestArgs() {
+    // Initial request for Dialogflow setup
+    const sessionPath = sessionClient.sessionPath(projectId, uuidv1());
+    return {
+        session: sessionPath,
+        queryInput: {
+            audioConfig: {
+                audioEncoding: encoding,
+                sampleRateHertz: sampleRateHertz,
+                languageCode: languageCode,
+            },
+            singleUtterance: true,
+        },
+        outputAudioConfig: {
+            audioEncoding: `OUTPUT_AUDIO_ENCODING_LINEAR_16`,
+            sampleRateHertz,
+        },
+    };
+}
+
+function getAudio() {
+    const detectStream = sessionClient
+        .streamingDetectIntent()
+        .on('error', console.error)
+
+    const recording = record
+        .record({
+            sampleRateHertz: 16000,
+            threshold: 0,
+            verbose: false,
+            recordProgram: 'arecord', // Try also "arecord" or "sox"
+            silence: '10.0',
+        });
+
+    const recordingStream = recording.stream()
+        .on('error', console.error);
+    
+    const pumpStream = pump(
+        recordingStream,
+        // Format the audio stream into the request format.
+        new Transform({
+            objectMode: true,
+            transform: (obj, _, next) => {
+                next(null, { inputAudio: obj });
+            },
+        }),
+        detectStream
+    );
+
+    return new Promise(resolve => {
+        let silent = true
+
+        // Try to get them to say stuff
+        detectStream.on('data', data => {
+            if (data.recognitionResult) {
+                silent = false
+                console.log(
+                    `Intermediate transcript: ${data.recognitionResult.transcript}`
+                );
+                if (data.recognitionResult.isFinal) {
+                    console.log("Got final result");
+                    recording.stop();
+                }
+            } 
+            if (data.queryResult) {
+                console.log(`Fulfillment text: ${data.queryResult.fulfillmentText}`);
+            }
+            if (data.outputAudio && data.outputAudio.length) {
+                resolve(data.outputAudio);
+                pumpStream.end();
+            }
+        });
+        detectStream.write(makeInitialStreamRequestArgs());
+
+        // ... or resolve after 5 seconds if they say nothing
+        // setTimeout(() => {
+        //     if (silent) {
+        //         detectStream.end();
+        //         // recording.stop();
+        //         // pumpStream.end();
+        //         resolve();
+        //     }
+        // }, 5000);
+    })
+}
+
+function playAudio(audioBuffer) {
+    return new Promise(resolve => {
+        // Setup the speaker for playing audio
+        const speaker = new Speaker({
+            channels: 1,
+            bitDepth: 16,
+            sampleRate: sampleRateHertz,
+        });
+        
+        speaker.on("close", () => {
+            resolve();
+        });
+
+        // Setup the audio stream, feed the audio buffer in
+        const audioStream = new PassThrough();
+        audioStream.pipe(speaker);
+        audioStream.end(audioBuffer);
+    })
+}
+
+async function stream() {
+    console.log('Listening, press Ctrl+C to stop.');
+
+    let conversing = true
+    while (conversing) {
+        const audio = await getAudio();
+        if (audio) {
+            await playAudio(audio);
+        } else {
+            conversing = false
+        }
+    }
+}
+
+stream();

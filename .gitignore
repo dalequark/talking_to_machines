@@ -3,3 +3,5 @@ __pycache__
 key.json
 venv
 .vscode
+node_modules
+Icon?
