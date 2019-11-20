@@ -15,9 +15,38 @@ const encoding = "LINEAR16";
 const sampleRateHertz = 16000;
 const languageCode = "en-US";
 
-function makeInitialStreamRequestArgs() {
+async function startTrivia(sessionId) {
+    // Create a new session
+    const sessionClient = new dialogflow.SessionsClient();
+    const sessionPath = sessionClient.sessionPath(projectId, sessionId);
+
+    // Kickoff with a request for trivia, so that the bot starts by
+    // talking instead of the human
+    const request = {
+        session: sessionPath,
+        queryInput: {
+        text: {
+            // The query to send to the dialogflow agent
+            text: "Let's play trivia",
+            // The language used by the client (en-US)
+            languageCode: 'en-US',
+        },
+        },
+        outputAudioConfig: {
+            audioEncoding: `OUTPUT_AUDIO_ENCODING_LINEAR_16`,
+            sampleRateHertz
+        },
+    };
+
+    // Send request and log result
+    const responses = await sessionClient.detectIntent(request);
+    console.log(`Fulfillment text: ${responses[0].queryResult.fulfillmentText}`);
+    return responses[0].outputAudio;
+}
+
+function makeInitialStreamRequestArgs(sessionId) {
     // Initial request for Dialogflow setup
-    const sessionPath = sessionClient.sessionPath(projectId, uuidv1());
+    const sessionPath = sessionClient.sessionPath(projectId, sessionId);
     return {
         session: sessionPath,
         queryInput: {
@@ -35,7 +64,7 @@ function makeInitialStreamRequestArgs() {
     };
 }
 
-function getAudio() {
+function getAudio(sessionId) {
     const detectStream = sessionClient
         .streamingDetectIntent()
         .on('error', console.error)
@@ -87,7 +116,8 @@ function getAudio() {
                 pumpStream.end();
             }
         });
-        detectStream.write(makeInitialStreamRequestArgs());
+
+        detectStream.write(makeInitialStreamRequestArgs(sessionId));
 
         // ... or resolve after 5 seconds if they say nothing
         // setTimeout(() => {
@@ -123,10 +153,15 @@ function playAudio(audioBuffer) {
 
 async function stream() {
     console.log('Listening, press Ctrl+C to stop.');
+    // Create a new id for this session
+    const sessionId = uuidv1();
 
-    let conversing = true
+    const welcomeAudio = await startTrivia(sessionId);
+    await playAudio(welcomeAudio);
+
+    let conversing = true;
     while (conversing) {
-        const audio = await getAudio();
+        const audio = await getAudio(sessionId);
         if (audio) {
             await playAudio(audio);
         } else {
