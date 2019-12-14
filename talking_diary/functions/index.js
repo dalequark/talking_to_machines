@@ -150,7 +150,7 @@ exports.analyzeEntry = functions.firestore
     const entities = await analyze.getEntitySentiment(data);
 
     if (entities) {
-      return change.after.ref.set({
+      return change.after.ref.update({
         analysis: entities
       });
     }
