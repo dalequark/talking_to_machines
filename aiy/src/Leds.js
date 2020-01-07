@@ -19,6 +19,8 @@ Color.PURPLE = [0xFF, 0x00, 0xFF];
 Color.CYAN   = [0x00, 0xFF, 0xFF];
 Color.WHITE  = [0xFF, 0xFF, 0xFF];
 
+module.exports.Color = Color;
+
 class Leds {
     /* Class to control the KTD LED driver chip in the button used with the
     Vision and Voice Bonnet. */
@@ -37,24 +39,30 @@ Leds.Channel = class {
         self.brightness = brightness;
     }
 
-    static rgb(state, rgb) {
-        // Creates a configuration for the RGB channels: 1 (red), 2 (green), 3 (blue).
-        return [
-            Leds.Channel(state, rgb[0]),
-            Leds.Channel(state, rgb[1]),
-            Leds.Channel(state, rgb[2])
-        ]
-    }
+}
 
-    static rgb_off() {
-        // Creates an "off" configuration for the button's RGB LED.
-        return Leds.rgb(Leds.Channel.OFF, Color.BLACK);
-    }
+static rgb(state, rgb) {
+	// Creates a configuration for the RGB channels: 0 (red), 1 (green), 2 (blue).
+	return [
+	    Leds.Channel(state, rgb[0]),
+	    Leds.Channel(state, rgb[1]),
+	    Leds.Channel(state, rgb[2])
+	]
+}
 
-    static rgb_on(rgb) {
-        // Creates an "on" configuration for the button's RGB LED.
-        return Leds.rgb(Leds.Channel.ON, rgb);
-    }
+static rgb_off() {
+	// Creates an "off" configuration for the button's RGB LED.
+	return Leds.rgb(Leds.Channel.OFF, Color.BLACK);
+}
+
+static rgb_on(rgb) {
+	// Creates an "on" configuration for the button's RGB LED.
+	return Leds.rgb(Leds.Channel.ON, rgb);
+}
+
+
+function reset() {
+	write(device_file("reset"), 1);
 }
 
 Leds.Channel.OFF = 0;
