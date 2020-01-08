@@ -16,7 +16,7 @@
 // Bonnet and Voice Bonnet/HAT's button connector.
 // JS version of https://github.com/google/aiyprojects-raspbian/blob/aiyprojects/src/aiy/board.py
 
-// Unofficial JS version of https://github.com/google/aiyprojects-raspbian/blob/aiyprojects/src/aiy/leds.py 
+// Unofficial JS version of https://github.com/google/aiyprojects-raspbian/blob/aiyprojects/src/aiy/leds.py
 
 const path = require("path");
 const fs = require("fs");
@@ -24,14 +24,23 @@ const fs = require("fs");
 const DEVICE_PATH = '/sys/class/leds/ktd202x:led1/device/';
 
 function _write(path, data) {
-    fs.writeFileSync(path, data);	
+    fs.writeFileSync(path, data);
 }
 
-function _device_file(prop) {
+function _deviceFile(prop) {
 	return path.join(DEVICE_PATH, prop);
 }
 
 class Color {
+
+    static BLACK  = [0x00, 0x00, 0x00];
+    static RED    = [0xFF, 0x00, 0x00];
+    static GREEN  = [0x00, 0xFF, 0x00];
+    static YELLOW = [0xFF, 0xFF, 0x00];
+    static BLUE   = [0x00, 0x00, 0xFF];
+    static PURPLE = [0xFF, 0x00, 0xFF];
+    static CYAN   = [0x00, 0xFF, 0xFF];
+    static WHITE  = [0xFF, 0xFF, 0xFF];
 
     static blend(color_a, color_b, alpha) {
         // Creates a color that is a blend between two colors.
@@ -41,15 +50,6 @@ class Color {
     }
 }
 
-Color.BLACK  = [0x00, 0x00, 0x00];
-Color.RED    = [0xFF, 0x00, 0x00];
-Color.GREEN  = [0x00, 0xFF, 0x00];
-Color.YELLOW = [0xFF, 0xFF, 0x00];
-Color.BLUE   = [0x00, 0x00, 0xFF];
-Color.PURPLE = [0xFF, 0x00, 0xFF];
-Color.CYAN   = [0x00, 0xFF, 0xFF];
-Color.WHITE  = [0xFF, 0xFF, 0xFF];
-
 module.exports.Color = Color;
 
 class Leds {
@@ -58,28 +58,28 @@ class Leds {
 
 
     static rgb(state, rgb) {
-        // Creates a configuration for the RGB channels: 1 (red), 2 (green), 3 (blue).
+        // Creates a configuration for the RGB Channel: 1 (red), 2 (green), 3 (blue).
         return [
-            Leds.Channel(state, rgb[0]),
-            Leds.Channel(state, rgb[1]),
-            Leds.Channel(state, rgb[2])
+            new Channel(state, rgb[0]),
+            new Channel(state, rgb[1]),
+            new Channel(state, rgb[2])
         ]
     }
 
-    static rgb_off() {
+    static rgbOff() {
         // Creates an "off" configuration for the button's RGB LED.
-        return Leds.rgb(Leds.Channel.OFF, Color.BLACK);
+        return Leds.rgb(Channel.OFF, Color.BLACK);
     }
 
-    static rgb_on(rgb) {
+    static rgbOn(rgb) {
         // Creates an "on" configuration for the button's RGB LED.
-        return Leds.rgb(Leds.Channel.ON, rgb);
+        return Leds.rgb(Channel.ON, rgb);
     }
 
-    update(channels) {
+    update(Channel) {
         let command = '';
-        for (let i = 0; i < channels.length; i++) {
-            const channel = channels[i];
+        for (let i = 0; i < Channel.length; i++) {
+            const Channel= Channel[i];
             if (channel.brightness) {
                 command += `led${i+1}=${channel.brightness};`;
             }
@@ -88,16 +88,19 @@ class Leds {
             }
         }
         if (command) {
-           _write(_device_file("registers"), command);
+           _write(_deviceFile("registers"), command);
         }
     }
 
     reset() {
-       _write(_device_file("reset"), 1);
+       _write(_deviceFile("reset"), 1);
     }
 }
 
-Leds.Channel = class {
+class Channel{
+    static OFF = 0
+    static ON = 1
+    static PATTERN = 2
 
     constructor(state, brightness) {
         if (![Channel.OFF, Channel.ON, Channel.Pattern].includes(state)) {
@@ -106,13 +109,11 @@ Leds.Channel = class {
         if (brightness < 0 || brightness > 255) {
             throw "Brightness must be in range [0,,255]";
         }
-        self.state = state;
-        self.brightness = brightness;
+        this.state = state;
+        this.brightness = brightness;
     }
 }
 
-Leds.Channel.OFF = 0;
-Leds.Channel.ON = 1;
-Leds.Channel.PATTERN = 2;
-
 module.exports.Leds = Leds;
+module.exports.Channel = Channel;
+module.exports.Color = Color;
