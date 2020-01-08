@@ -39,7 +39,12 @@ function extractNumber(answer) {
 
 async function getQuestionsAnsweredIndex(userId) {
   const userDoc = await db.collection('users').doc(userId).get();
-  return userDoc.data().questionIndex();
+  if (!userDoc.exists) {
+    console.log(
+        `Error: user documemt ${userId} doesn't exist in collection "users"`);
+    return -1;
+  }
+  return userDoc.data().questionIndex;
 }
 
 async function updateQuestionsAnsweredIndex(userId, index) {
@@ -50,11 +55,18 @@ async function updateQuestionsAnsweredIndex(userId, index) {
 
 async function getQuestion() {
   const questionIndex = await getQuestionsAnsweredIndex(USER_ID);
+  console.log(`Got question index ${questionIndex}`);
+
   let question = null;
   try {
-    question = await db.collection('trivia').doc(questionIndex).get();
+    question = await db.collection('trivia').doc((questionIndex+1).toString()).get();
+    if (!question.exists) {
+      throw new Error(`Tried to grab 
+      question id ${questionIndex+1} which doesn't exist`);
+    }
+    console.log(`Pulled question `, question.data());
     // TODO: Have the question index wrap
-    await updateQuestionsAnsweredIndex(USER_ID, questionIndex + 1);
+    await updateQuestionsAnsweredIndex(USER_ID, questionIndex+1);
   } catch (err) {
     console.log('Got firestore error ', err);
   }
@@ -66,11 +78,10 @@ functions.https.onRequest((request, response) => {
   const agent = new WebhookClient({request, response});
 
 
-  async function setQuestionContext() {
+  function setQuestionContext(question) {
     const oldContext = agent.getContext('quiz_data');
-    const questionsCorrect = oldContext.parameters.questions_correct;
-    const question = await getQuestion();
-
+    const questionsCorrect =
+        oldContext ? oldContext.parameters.questions_correct : 0;       
     agent.setContext({
       name: 'quiz_data',
       lifespan: 99,
@@ -86,19 +97,22 @@ functions.https.onRequest((request, response) => {
     console.log('Hello Ask Question');
 
     const lastState = agent.parameters.lastState;
+    console.log(`Last state was ${lastState}`);
 
     if (!lastState) {
       // Set up the first question
-      await setQuestionContext();
-      const context = agent.getContext('quiz_data');
+      const question = await getQuestion();
+      await setQuestionContext(question);
       agent.add(`${WELCOME_MESSAGE}.
-      You're first question is ${context.parameters.current_question}`);
+      You're first question is ${question.question}`);
       return;
     }
 
     const context = agent.getContext('quiz_data');
 
     if (context.parameters.questions_correct == NUM_QUESTIONS) {
+      agent.context.delete('quiz_data');
+      agent.setContext('trivia-done');
       agent.setFollowupEvent({
         'name': 'quiz-done',
         'languageCode': 'en',
@@ -113,15 +127,17 @@ functions.https.onRequest((request, response) => {
     }
 
     if (lastState == 'Next Question') {
-      await setQuestionContext();
+      const question = await getQuestion();
+      await setQuestionContext(question);
       agent.add(`No problem. 
-      I'll get you a new question ${context.parameters.current_question}`);
+      I'll get you a new question. ${question.question}`);
       return;
     }
 
     if (lastState == 'No Number') {
       agent.add(`What's that? Remember to answer with a number. 
       ${context.parameters.current_question}`);
+      return;
     }
 
     if (lastState == 'Wrong Answer') {
@@ -130,8 +146,9 @@ functions.https.onRequest((request, response) => {
     }
 
     if (lastState == 'Right Answer') {
-      await setQuestionContext();
-      agent.add(`TODO: Give next question`);
+      const question = await getQuestion();
+      await setQuestionContext(question);
+      agent.add(`That's right! Your next question is ${question.question}`);
       return;
     }
 
@@ -167,20 +184,19 @@ functions.https.onRequest((request, response) => {
 
     let lastState;
 
+    const context = agent.getContext('quiz_data');
     if (!userAnswer) {
       lastState = 'No Number';
-    } else if (agent.parameters.answer == userAnswer) {
+    } else if (context.parameters.answer == userAnswer) {
       lastState = 'Right Answer';
 
-      // Update number of questions correct
-      const oldContext = agent.getContext('quiz_data');
       agent.setContext({
         name: 'quiz_data',
         lifespan: 99,
         parameters: {
-          current_question: oldContext.parameters.question,
-          current_answer: oldContext.parameters.answer,
-          questions_correct: oldContext.parameters.questions_correct + 1,
+          current_question: context.parameters.question,
+          current_answer: context.parameters.answer,
+          questions_correct: context.parameters.questions_correct + 1,
         },
       });
     } else {
