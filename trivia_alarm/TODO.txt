@@ -1,0 +1,4 @@
+- Simple alarm voice is weirdly low for tts response, having to do with single speaker output
+- Need to make it so that dialogflow streaming times out, and it's triggered with a button
+- Alarm audio doesn't play, possibly something with async?
+- Figure out why pausing stdin stream isn't working when starting simple alarm

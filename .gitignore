@@ -1,4 +1,6 @@
 *.wav
+*key*
+env.sh
 __pycache__
 key.json
 venv
