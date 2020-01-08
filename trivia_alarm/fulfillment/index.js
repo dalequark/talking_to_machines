@@ -89,7 +89,7 @@ functions.https.onRequest((request, response) => {
 
     if (!lastState) {
       // Set up the first question
-      await setQuestionContext(correct = false);
+      await setQuestionContext();
       const context = agent.getContext('quiz_data');
       agent.add(`${WELCOME_MESSAGE}.
       You're first question is ${context.parameters.current_question}`);
@@ -113,7 +113,7 @@ functions.https.onRequest((request, response) => {
     }
 
     if (lastState == 'Next Question') {
-      await setQuestionContext(correct = false);
+      await setQuestionContext();
       agent.add(`No problem. 
       I'll get you a new question ${context.parameters.current_question}`);
       return;
@@ -130,7 +130,7 @@ functions.https.onRequest((request, response) => {
     }
 
     if (lastState == 'Right Answer') {
-      await setQuestionContext(correct = true);
+      await setQuestionContext();
       agent.add(`TODO: Give next question`);
       return;
     }
