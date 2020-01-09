@@ -30,6 +30,8 @@ const WELCOME_MESSAGE = `Good morning! Good morning! Wake up!
 It\'s time to answer some trivia questions.`;
 
 const NUM_QUESTIONS = 3;
+
+// TODO: Add users. For now, we'll use a dummy id.
 const USER_ID = '3HGBBSXFlwArhH5MbvHb';
 
 function extractNumber(answer) {
@@ -38,38 +40,40 @@ function extractNumber(answer) {
 }
 
 async function getQuestionsAnsweredIndex(userId) {
-  const userDoc = await db.collection('users').doc(userId).get();
-  if (!userDoc.exists) {
-    console.log(
-        `Error: user documemt ${userId} doesn't exist in collection "users"`);
-    return -1;
-  }
-  return userDoc.data().questionIndex;
+  return 1;
+//   const userDoc = await db.collection('users').doc(userId).get();
+//   if (!userDoc.exists) {
+//     console.log(
+//         `Error: user documemt ${userId} doesn't exist in collection "users"`);
+//     return -1;
+//   }
+//   return userDoc.data().questionIndex;
 }
 
 async function updateQuestionsAnsweredIndex(userId, index) {
-  await db.collection('users').doc(userId).update({
-    'questionIndex': index,
-  });
+//   await db.collection('users').doc(userId).update({
+//     'questionIndex': index,
+//   });
 }
 
 async function getQuestion() {
-  const questionIndex = await getQuestionsAnsweredIndex(USER_ID);
+  let questionIndex = await getQuestionsAnsweredIndex(USER_ID);
   console.log(`Got question index ${questionIndex}`);
 
-  let question = null;
-  try {
-    question = await db.collection('trivia').doc((questionIndex+1).toString()).get();
-    if (!question.exists) {
-      throw new Error(`Tried to grab 
-      question id ${questionIndex+1} which doesn't exist`);
-    }
-    console.log(`Pulled question `, question.data());
-    // TODO: Have the question index wrap
-    await updateQuestionsAnsweredIndex(USER_ID, questionIndex+1);
-  } catch (err) {
-    console.log('Got firestore error ', err);
+  let question =
+    await db.collection('trivia').doc((questionIndex+1).toString()).get();
+
+  if (!question.exists) {
+    // This means we've run out of questions and need to wrap around.
+    console.log('Ran out of questions, needed to wrap');
+    questionIndex = 0;
+    question =
+        await db.collection('trivia').doc((questionIndex+1).toString()).get();
   }
+
+  console.log(`Pulled question ${question.data().question} with answer ${question.data().answer}`);
+  await updateQuestionsAnsweredIndex(USER_ID, questionIndex+1);
+
   return question ? question.data() : null;
 }
 
@@ -79,22 +83,25 @@ functions.https.onRequest((request, response) => {
 
 
   function setQuestionContext(question) {
-    const oldContext = agent.getContext('quiz_data');
+    const oldContext = agent.context.get('quiz_data');
+    console.log('Setting question context. Old context was ', oldContext);
+    console.log(`Setting question context with new question ${question.question}`);
+    console.log(`Setting question context with qusetions correct ${ oldContext ? oldContext.parameters.questions_correct : 0}`);
     const questionsCorrect =
-        oldContext ? oldContext.parameters.questions_correct : 0;       
-    agent.setContext({
+        oldContext ? oldContext.parameters.questions_correct : 0;
+    agent.context.set({
       name: 'quiz_data',
       lifespan: 99,
       parameters: {
-        current_question: question ? question.question : null,
-        current_answer: question ? question.answer : null,
+        question: question ? question.question : null,
+        answer: question ? question.answer : null,
         questions_correct: questionsCorrect,
       },
     });
   }
 
   async function askQuestion(agent) {
-    console.log('Hello Ask Question');
+    console.log('Hello from Ask Question');
 
     const lastState = agent.parameters.lastState;
     console.log(`Last state was ${lastState}`);
@@ -102,17 +109,20 @@ functions.https.onRequest((request, response) => {
     if (!lastState) {
       // Set up the first question
       const question = await getQuestion();
-      await setQuestionContext(question);
-      agent.add(`${WELCOME_MESSAGE}.
+      setQuestionContext(question);
+      console.log('Adding message to agent');
+      agent.add(`${WELCOME_MESSAGE}
       You're first question is ${question.question}`);
       return;
     }
 
-    const context = agent.getContext('quiz_data');
+    const context = agent.context.get('quiz_data');
+    console.log('In ask question, got context ', context);
 
     if (context.parameters.questions_correct == NUM_QUESTIONS) {
       agent.context.delete('quiz_data');
-      agent.setContext('trivia-done');
+      agent.context.set('trivia-done');
+      agent.add('Some dummy text');
       agent.setFollowupEvent({
         'name': 'quiz-done',
         'languageCode': 'en',
@@ -122,13 +132,13 @@ functions.https.onRequest((request, response) => {
     }
 
     if (lastState == 'Snooze') {
-      agent.add(`No time for snoozing! ${context.parameters.current_question}`);
+      agent.add(`No time for snoozing! ${context.parameters.question}`);
       return;
     }
 
     if (lastState == 'Next Question') {
       const question = await getQuestion();
-      await setQuestionContext(question);
+      setQuestionContext(question);
       agent.add(`No problem. 
       I'll get you a new question. ${question.question}`);
       return;
@@ -136,18 +146,18 @@ functions.https.onRequest((request, response) => {
 
     if (lastState == 'No Number') {
       agent.add(`What's that? Remember to answer with a number. 
-      ${context.parameters.current_question}`);
+      ${context.parameters.question}`);
       return;
     }
 
     if (lastState == 'Wrong Answer') {
-      agent.add(`Sorry, wrong answer. ${context.parameters.current_question}`);
+      agent.add(`Sorry, wrong answer. ${context.parameters.question}`);
       return;
     }
 
     if (lastState == 'Right Answer') {
       const question = await getQuestion();
-      await setQuestionContext(question);
+      setQuestionContext(question);
       agent.add(`That's right! Your next question is ${question.question}`);
       return;
     }
@@ -156,7 +166,9 @@ functions.https.onRequest((request, response) => {
   }
 
   function snooze(agent) {
+    console.log('Hello from Snooze');
     // If user tries to snooze, pop them back to question-1.
+    agent.add('Some dummy text');
     agent.setFollowupEvent({
       'name': 'ask-question',
       'parameters': {
@@ -168,6 +180,8 @@ functions.https.onRequest((request, response) => {
   }
 
   function nextQuestion(agent) {
+    console.log('Hello from Next Question');
+    agent.add('Some dummy text');
     agent.setFollowupEvent({
       'name': 'ask-question',
       'parameters': {
@@ -179,30 +193,40 @@ functions.https.onRequest((request, response) => {
   }
 
   function answerQuestion(agent) {
-    console.log(`Got user query ${agent.query}`);
+    console.log(`In question answer with user query ${agent.query}`);
+
     const userAnswer = extractNumber(agent.query);
 
-    let lastState;
+    console.log(`Got user answer ${userAnswer}`);
 
-    const context = agent.getContext('quiz_data');
+    let lastState = 'Mystery State';
+
+    const context = agent.context.get('quiz_data');
+
+    console.log('Got context ', context);
+
     if (!userAnswer) {
       lastState = 'No Number';
+      console.log('Got no user answer');
     } else if (context.parameters.answer == userAnswer) {
-      lastState = 'Right Answer';
+      console.log(`User got the right answer`);
 
-      agent.setContext({
+      lastState = 'Right Answer';
+      agent.context.set({
         name: 'quiz_data',
         lifespan: 99,
         parameters: {
-          current_question: context.parameters.question,
-          current_answer: context.parameters.answer,
+          question: context.parameters.question,
+          answer: context.parameters.answer,
           questions_correct: context.parameters.questions_correct + 1,
         },
       });
     } else {
+      console.log(`User gave the wrong answer: ${userAnswer} vs correct ${context.parameters.answer}`);
       lastState = 'Wrong Answer';
     }
-
+    console.log(`Setting follow up event with last state ${lastState}`);
+    agent.add('Some dummy text');
     agent.setFollowupEvent({
       'name': 'ask-question',
       'parameters': {
