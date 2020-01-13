@@ -1,5 +1,0 @@
-class AIY {
-    constructor (ops) {
-        
-    }
-}
