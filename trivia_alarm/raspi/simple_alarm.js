@@ -30,7 +30,7 @@ function setCronAlarm(timeString, dfStream, alarmSound) {
     currentAlarmMoment = moment(timeString);
     currentAlarm = cron.schedule(`${currentAlarmMoment.second()} ${currentAlarmMoment.minute()} ${currentAlarmMoment.hour()} * * *`,
         async () => {
-            await dfStream.playAudio(alarmSound);
+            await dfStream.playAudio(alarmSound, 2);
         });
 }
 
@@ -80,7 +80,16 @@ async function handleResponse(dfStream, audio, queryResult) {
         deleteAlarm();
     }
 
-    await dfStream.playAudio(audio);
+    if (intent == LIST_ALARM) {
+    	await dfStream.playAudio(audio, 2);
+    }
+    else {
+    	await dfStream.playAudio(audio, 1);
+    }
+    if (queryResult.diagnosticInfo && queryResult.diagnosticInfo["fields"]["endConversation"]["boolValue"]) {
+    	return false;
+    }
+    return true;
 }
 
 let currentAlarm;
@@ -98,9 +107,6 @@ async function stream() {
     // Create a new id for this session
     const sessionId = uuidv1();
 
-    // Create an alarm sound
-    alarmSound = await createAlarmSound();
-
     // Create a dialogflow stream that times out after 3 seconds
     const stream = new DialogflowStream(process.env.ALARM_PROJECT_ID, 3000);
 
@@ -108,7 +114,8 @@ async function stream() {
     while (conversing) {
         const res = await stream.getAudio(sessionId);
         if (res["audio"]) {
-            await handleResponse(stream, res["audio"], res["queryResult"]);
+            conversing = await handleResponse(stream, res["audio"], res["queryResult"]);
+	    console.log(`Done handling response, conversing is ${conversing}`);
         } else {
             conversing = false;
         }
@@ -119,7 +126,9 @@ async function main() {
 
 	// Make sure you can't enter streaming twice
 	let inPress = false;
-
+	console.log("Creating alarm sound from TTS API...");
+	await createAlarmSound();
+	console.log("Done");
 	if (process.env.RASPI) {
 		console.log("On Raspberry Pi, waiting for button press");
 		button.watch(async (err, val) => {
@@ -130,7 +139,9 @@ async function main() {
 				console.log(err);
 				return;
 			}
+			console.log("recording");
 			await stream();
+			console.log("done recording");
 			inPress = false;
 		});
 	}
@@ -140,7 +151,9 @@ async function main() {
 		console.log("Got key press");
 		if (inPress)	return;
 		inPress = true;
+		console.log("recording");
 		await stream();
+		console.log("done recording");
 		inPress = false;
 	    });
 	}

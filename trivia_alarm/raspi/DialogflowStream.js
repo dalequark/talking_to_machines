@@ -88,8 +88,8 @@ class DialogflowStream {
                     queryResult = data.queryResult;
                 }
                 if (data.outputAudio && data.outputAudio.length) {
-                    resolve({"audio" : data.outputAudio, "queryResult" : queryResult});
                     pumpStream.end();
+                    resolve({"audio" : data.outputAudio, "queryResult" : queryResult});
                 }
             });
     
@@ -107,11 +107,11 @@ class DialogflowStream {
         })
     }
 
-    playAudio(audioBuffer) {
+    playAudio(audioBuffer, channels=1) {
         return new Promise(resolve => {
             // Setup the speaker for playing audio
             const speaker = new Speaker({
-                channels: 1,
+                channels: channels,
                 bitDepth: 16,
                 sampleRate: sampleRateHertz,
             });
