@@ -33,14 +33,6 @@ function _deviceFile(prop) {
 
 class Color {
 
-    static BLACK  = [0x00, 0x00, 0x00];
-    static RED    = [0xFF, 0x00, 0x00];
-    static GREEN  = [0x00, 0xFF, 0x00];
-    static YELLOW = [0xFF, 0xFF, 0x00];
-    static BLUE   = [0x00, 0x00, 0xFF];
-    static PURPLE = [0xFF, 0x00, 0xFF];
-    static CYAN   = [0x00, 0xFF, 0xFF];
-    static WHITE  = [0xFF, 0xFF, 0xFF];
 
     static blend(color_a, color_b, alpha) {
         // Creates a color that is a blend between two colors.
@@ -49,6 +41,15 @@ class Color {
         });
     }
 }
+
+Color.BLACK  = [0x00, 0x00, 0x00];
+Color.RED    = [0xFF, 0x00, 0x00];
+Color.GREEN  = [0x00, 0xFF, 0x00];
+Color.YELLOW = [0xFF, 0xFF, 0x00];
+Color.BLUE   = [0x00, 0x00, 0xFF];
+Color.PURPLE = [0xFF, 0x00, 0xFF];
+Color.CYAN   = [0x00, 0xFF, 0xFF];
+Color.WHITE  = [0xFF, 0xFF, 0xFF];
 
 module.exports.Color = Color;
 
@@ -76,15 +77,15 @@ class Leds {
         return Leds.rgb(Channel.ON, rgb);
     }
 
-    update(Channel) {
+    update(channels) {
         let command = '';
-        for (let i = 0; i < Channel.length; i++) {
-            const Channel= Channel[i];
-            if (channel.brightness) {
+        for (let i = 0; i < channels.length; i++) {
+            const channel= channels[i];
+            if (channel.brightness != null) {
                 command += `led${i+1}=${channel.brightness};`;
             }
-            if (channel.state) {
-                command += `ch${i}_enabled=${channel.state};`;
+            if (channel.state != null) {
+                command += `ch${i+1}_enable=${channel.state};`;
             }
         }
         if (command) {
@@ -98,10 +99,6 @@ class Leds {
 }
 
 class Channel{
-    static OFF = 0
-    static ON = 1
-    static PATTERN = 2
-
     constructor(state, brightness) {
         if (![Channel.OFF, Channel.ON, Channel.Pattern].includes(state)) {
             throw "State must be 0, 1, or 2.";
@@ -113,6 +110,11 @@ class Channel{
         this.brightness = brightness;
     }
 }
+
+Channel.OFF = 0
+Channel.ON = 1
+Channel.PATTERN = 2
+
 
 module.exports.Leds = Leds;
 module.exports.Channel = Channel;
