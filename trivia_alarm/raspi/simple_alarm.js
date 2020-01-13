@@ -4,7 +4,17 @@ const DialogflowStream = require('./DialogflowStream.js');
 const cron = require('node-cron');
 const moment = require('moment');
 const textToSpeech = require('@google-cloud/text-to-speech');
+const dotenv = require('dotenv');
 const keypress = require('keypress');
+
+dotenv.config()
+
+let button;
+
+if (process.env.RASPI) {
+	const Gpio = require('onoff').Gpio;
+	button = new Gpio(parseInt(process.env.BUTTON_PIN), 'in', 'rising', {debounceTimeout: 10});
+}
 
 async function createAlarmSound() {
     const ssml = `
@@ -21,7 +31,6 @@ function setCronAlarm(timeString, dfStream, alarmSound) {
     currentAlarm = cron.schedule(`${currentAlarmMoment.second()} ${currentAlarmMoment.minute()} ${currentAlarmMoment.hour()} * * *`,
         async () => {
             await dfStream.playAudio(alarmSound);
-            console.log("Hello! It's your alarm!");
         });
 }
 
@@ -108,13 +117,32 @@ async function stream() {
 
 async function main() {
 
-    keypress(process.stdin);
-    process.stdin.on('keypress', async function (ch, key) {
-        // TODO: This pause doesn't seem to be working
-        process.stdin.pause();
-        await stream();
-        process.stdin.resume();
-    });
-}
+	// Make sure you can't enter streaming twice
+	let inPress = false;
 
-main();
+	if (process.env.RASPI) {
+		console.log("On Raspberry Pi, waiting for button press");
+		button.watch(async (err, val) => {
+			console.log("Got button press");
+			if (inPress)	return;
+			inPress = true;
+			if (err) {
+				console.log(err);
+				return;
+			}
+			await stream();
+			inPress = false;
+		});
+	}
+    
+	keypress(process.stdin);
+	process.stdin.on('keypress', async function (ch, key) {
+		console.log("Got key press");
+		if (inPress)	return;
+		inPress = true;
+		await stream();
+		inPress = false;
+	    });
+	}
+
+	main();
