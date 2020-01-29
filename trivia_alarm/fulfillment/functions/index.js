@@ -21,6 +21,7 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const {WebhookClient} = require('dialogflow-fulfillment');
+const trivia = require('./trivia');
 
 process.env.DEBUG = 'dialogflow:*'; // enables lib debugging statements
 admin.initializeApp(functions.config().firebase);
@@ -39,54 +40,25 @@ function extractNumber(answer) {
   return result ? result[0] : null;
 }
 
-async function getQuestionsAnsweredIndex(userId) {
-  return 1;
-//   const userDoc = await db.collection('users').doc(userId).get();
-//   if (!userDoc.exists) {
-//     console.log(
-//         `Error: user documemt ${userId} doesn't exist in collection "users"`);
-//     return -1;
-//   }
-//   return userDoc.data().questionIndex;
-}
-
-async function updateQuestionsAnsweredIndex(userId, index) {
-//   await db.collection('users').doc(userId).update({
-//     'questionIndex': index,
-//   });
-}
-
-async function getQuestion() {
-  let questionIndex = await getQuestionsAnsweredIndex(USER_ID);
-  console.log(`Got question index ${questionIndex}`);
-
-  let question =
-    await db.collection('trivia').doc((questionIndex+1).toString()).get();
-
-  if (!question.exists) {
-    // This means we've run out of questions and need to wrap around.
-    console.log('Ran out of questions, needed to wrap');
-    questionIndex = 0;
-    question =
-        await db.collection('trivia').doc((questionIndex+1).toString()).get();
-  }
-
-  console.log(`Pulled question ${question.data().question} with answer ${question.data().answer}`);
-  await updateQuestionsAnsweredIndex(USER_ID, questionIndex+1);
-
-  return question ? question.data() : null;
-}
-
 exports.dialogflowFirebaseFulfillment =
 functions.https.onRequest((request, response) => {
   const agent = new WebhookClient({request, response});
 
 
+  function getQuestion() {
+    const questionNum = agent.context.get('quiz_data') ? agent.context.get('quiz_data').questions_correct + 1 : 1;
+    // Start the first third questions easy, then medium, then difficult
+    if (questionNum / NUM_QUESTIONS <= 1/3)  return trivia.getEasyQuestion();
+    if (questionNum / NUM_QUESTIONS <= 2/3)  return trivia.getMediumQuestion();
+    return trivia.getHardQuestion();
+  }
+
+  
   function setQuestionContext(question) {
     const oldContext = agent.context.get('quiz_data');
     console.log('Setting question context. Old context was ', oldContext);
     console.log(`Setting question context with new question ${question.question}`);
-    console.log(`Setting question context with qusetions correct ${ oldContext ? oldContext.parameters.questions_correct : 0}`);
+    console.log(`Setting question context with questions correct ${ oldContext ? oldContext.parameters.questions_correct : 0}`);
     const questionsCorrect =
         oldContext ? oldContext.parameters.questions_correct : 0;
     agent.context.set({
@@ -108,11 +80,12 @@ functions.https.onRequest((request, response) => {
 
     if (!lastState) {
       // Set up the first question
-      const question = await getQuestion();
+      agent.context.delete('quiz_data');
+      const question = getQuestion();
       setQuestionContext(question);
       console.log('Adding message to agent');
       agent.add(`${WELCOME_MESSAGE}
-      You're first question is ${question.question}`);
+      Your first question is ${question.question}`);
       return;
     }
 
@@ -120,7 +93,6 @@ functions.https.onRequest((request, response) => {
     console.log('In ask question, got context ', context);
 
     if (context.parameters.questions_correct == NUM_QUESTIONS) {
-      agent.context.delete('quiz_data');
       agent.context.set('trivia-done');
       agent.add('Some dummy text');
       agent.setFollowupEvent({
@@ -137,7 +109,7 @@ functions.https.onRequest((request, response) => {
     }
 
     if (lastState == 'Next Question') {
-      const question = await getQuestion();
+      const question = getQuestion();
       setQuestionContext(question);
       agent.add(`No problem. 
       I'll get you a new question. ${question.question}`);
@@ -156,13 +128,13 @@ functions.https.onRequest((request, response) => {
     }
 
     if (lastState == 'Right Answer') {
-      const question = await getQuestion();
+      const question = getQuestion();
       setQuestionContext(question);
       agent.add(`That's right! Your next question is ${question.question}`);
       return;
     }
 
-    agent.add('Got to question-1 in a weird way. We should never get here!');
+    agent.add('Got to question answer in a weird way. We should never get here!');
   }
 
   function snooze(agent) {
