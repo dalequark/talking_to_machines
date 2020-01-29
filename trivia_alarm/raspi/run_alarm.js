@@ -88,7 +88,7 @@ async function handleResponse(dfStream, audio, queryResult) {
     else {
     	await dfStream.playAudio(audio, 1);
     }
-    if (queryResult.diagnosticInfo && queryResult.diagnosticInfo["fields"]["end_conversation"]["boolValue"]) {
+    if (queryResult.diagnosticInfo && queryResult.diagnosticInfo["fields"]["end_conversation"]) {
     	return false;
     }
     return true;
