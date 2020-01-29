@@ -1,6 +1,6 @@
 
 const uuidv1 = require('uuid/v1');
-const DialogflowStream = require('./DialogflowStream.js');
+const DialogflowStream = require('../../js_utils/DialogflowStream');
 const cron = require('node-cron');
 const moment = require('moment');
 const textToSpeech = require('@google-cloud/text-to-speech');
@@ -26,11 +26,13 @@ async function createAlarmSound() {
 }
 
 function setCronAlarm(timeString, dfStream, alarmSound) {
+    console.log("Setting an alarm for " + timeString);
     // Set an alarm to ring every day at the specified time
     currentAlarmMoment = moment(timeString);
     currentAlarm = cron.schedule(`${currentAlarmMoment.second()} ${currentAlarmMoment.minute()} ${currentAlarmMoment.hour()} * * *`,
         async () => {
-            await dfStream.playAudio(alarmSound, 2);
+            console.log("Hello this is your alarm wake up!");
+            await dfStream.playAudio(alarmSound, 1);
         });
 }
 
@@ -46,8 +48,8 @@ async function tts(ssml) {
     // Construct the request
     const request = {
         input: { ssml: ssml },
-        voice: { languageCode: 'en-US', name: "en-US-Standard-E" },
-        audioConfig: { audioEncoding: 'LINEAR16', sample_rate_hertz: 16000 },
+        voice: { languageCode: 'en-US', name: "en-US-Wavenet-D" },
+        audioConfig: { audioEncoding: 'LINEAR16', sample_rate_hertz: 24000},
     };
     const [response] = await ttsClient.synthesizeSpeech(request);
     return response["audioContent"];
@@ -81,12 +83,12 @@ async function handleResponse(dfStream, audio, queryResult) {
     }
 
     if (intent == LIST_ALARM) {
-    	await dfStream.playAudio(audio, 2);
+    	await dfStream.playAudio(audio, 1);
     }
     else {
     	await dfStream.playAudio(audio, 1);
     }
-    if (queryResult.diagnosticInfo && queryResult.diagnosticInfo["fields"]["endConversation"]["boolValue"]) {
+    if (queryResult.diagnosticInfo && queryResult.diagnosticInfo["fields"]["end_conversation"]["boolValue"]) {
     	return false;
     }
     return true;
@@ -115,7 +117,6 @@ async function stream() {
         const res = await stream.getAudio(sessionId);
         if (res["audio"]) {
             conversing = await handleResponse(stream, res["audio"], res["queryResult"]);
-	    console.log(`Done handling response, conversing is ${conversing}`);
         } else {
             conversing = false;
         }
@@ -123,11 +124,9 @@ async function stream() {
 }
 
 async function main() {
-
-	// Make sure you can't enter streaming twice
 	let inPress = false;
 	console.log("Creating alarm sound from TTS API...");
-	await createAlarmSound();
+	alarmSound = await createAlarmSound();
 	console.log("Done");
 	if (process.env.RASPI) {
 		console.log("On Raspberry Pi, waiting for button press");
