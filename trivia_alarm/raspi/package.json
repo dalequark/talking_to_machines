@@ -12,10 +12,12 @@
     "@google-cloud/common": "^2.2.3",
     "@google-cloud/text-to-speech": "^2.1.2",
     "dialogflow": "^0.14.1",
+    "dotenv": "^8.2.0",
     "keypress": "^0.2.1",
     "moment": "^2.24.0",
     "node-cron": "^2.0.3",
     "node-record-lpcm16": "^1.0.1",
+    "onoff": "^5.0.1",
     "pump": "^3.0.0",
     "speaker": "^0.4.2"
   }

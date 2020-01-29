@@ -1,0 +1,36 @@
+{
+  "name": "talking-diary",
+  "description": "A dialogflow diary that keeps track of your day",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "author": "Google Inc.",
+  "engines": {
+    "node": "8"
+  },
+  "scripts": {
+    "lint": "eslint --fix \"**/*.js\"",
+    "test": "mocha --reporter spec",
+    "serve": "firebase serve --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "@google-cloud/language": "^3.6.3",
+    "actions-on-google": "^2.6.0",
+    "dotenv": "^6.0.0",
+    "firebase-admin": "^8.8.0",
+    "firebase-functions": "^3.3.0",
+    "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "eslint": "^5.2.0",
+    "eslint-config-google": "^0.9.1",
+    "firebase-functions-test": "^0.1.7",
+    "mocha": "^6.2.2",
+    "sinon": "^7.5.0"
+  }
+}

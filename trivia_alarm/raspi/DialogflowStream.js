@@ -11,10 +11,11 @@ const languageCode = "en-US";
 
 class DialogflowStream {
 
-    constructor(projectId, timeout=null) {
+    constructor(projectId, recordingProgram='sox', timeout=null) {
         this.sessionClient = new dialogflow.SessionsClient();
         this.projectId = projectId;
         this.timeout = timeout;
+	this.recordingProgram = recordingProgram;
     }
 
     makeInitialStreamRequestArgs(sessionId) {
@@ -44,10 +45,10 @@ class DialogflowStream {
     
         const recording = record
             .record({
-                sampleRateHertz: 16000,
+                sampleRateHertz: 48000, //16000,
                 threshold: 0,
                 verbose: false,
-                recordProgram: 'arecord', // Try also "arecord" or "sox"
+                recordProgram: this.recordingProgram, // Try also "arecord" or "sox"
                 silence: '10.0',
             });
     
@@ -87,8 +88,8 @@ class DialogflowStream {
                     queryResult = data.queryResult;
                 }
                 if (data.outputAudio && data.outputAudio.length) {
-                    resolve({"audio" : data.outputAudio, "queryResult" : queryResult});
                     pumpStream.end();
+                    resolve({"audio" : data.outputAudio, "queryResult" : queryResult});
                 }
             });
     
@@ -106,11 +107,11 @@ class DialogflowStream {
         })
     }
 
-    playAudio(audioBuffer) {
+    playAudio(audioBuffer, channels=1) {
         return new Promise(resolve => {
             // Setup the speaker for playing audio
             const speaker = new Speaker({
-                channels: 1,
+                channels: channels,
                 bitDepth: 16,
                 sampleRate: sampleRateHertz,
             });
