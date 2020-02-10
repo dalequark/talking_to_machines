@@ -25,12 +25,18 @@ dotenv.config()
 
 let button;
 
+// If we're running on an AIY Voice Kit with a Raspbery Pi,
+// configure the pushbutton.
 if (process.env.RASPI) {
 	const Gpio = require('onoff').Gpio;
 	button = new Gpio(parseInt(process.env.BUTTON_PIN), 'in', 'rising', {debounceTimeout: 10});
 }
 
+// Calls the Text-to-Speech API to create audio data that can be played as an alarm sound.
 async function createAlarmSound() {
+    // SSML, or "Speech Synthesis Markup Language", is a way of specifying how text should
+    // be converted to speech. Here, we use it to include a bugle sound along with 
+    // a spoken message ("It's time to wake up...")
     const ssml = `
     <speak>
         <audio src="https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg"></audio>
@@ -39,6 +45,9 @@ async function createAlarmSound() {
     return await tts(ssml);
 }
 
+// Set an alarm to ring at time specified in timeString. dfStream
+// gives this function access to the speaker. alarmSound should be 
+// audio data that can be played through the speaker at alarm time.
 function setCronAlarm(timeString, dfStream, alarmSound) {
     console.log("Setting an alarm for " + timeString);
     // Set an alarm to ring every day at the specified time
@@ -57,6 +66,8 @@ function deleteAlarm() {
     currentAlarmMoment = null;
 }
 
+// Given ssml (https://developers.google.com/assistant/actions/reference/ssml),
+// calls the Text-to-Speech API and returns an audio data response.
 async function tts(ssml) {
     const ttsClient = new textToSpeech.TextToSpeechClient();
     // Construct the request
@@ -69,22 +80,28 @@ async function tts(ssml) {
     return response["audioContent"];
 }
 
+// Function that decides how to respond once a Dialogflow intent is matched.
 async function handleResponse(dfStream, audio, queryResult) {
     const intent = queryResult.intent.displayName;
+    // Check if the user mentioned a specific alarm time in their request
     const alarmTime = queryResult.parameters["fields"]["time"] ? queryResult.parameters["fields"]["time"]["stringValue"] : null;
 
     if (intent == LIST_ALARM) {
         let textIn = "You don't have an alarm set";
         if (currentAlarmMoment) {
             console.log(`Current alarm string is ${currentAlarmMoment}`);
+            // If the user asks what time their alarm is set for, we need to
+            // generate a response locally since alarm time (currentAlarmMoment)
+            // is stored locally.
             textIn = `
             <speak>
                 You have an alarm set for <say-as interpret-as="time">${currentAlarmMoment.hour()}:${currentAlarmMoment.minute()}</say-as>
             </speak>
             `;
         }
-        // If we're listing the alarm, create a local audio response
-        // rather than play the one returned from dialogflow
+        // Instead of playing the audio response we get from Dialogflow,
+        // we'll convert the text we generated above into speech and
+        // play that instead.
         audio = await tts(textIn);
     }
 
@@ -102,6 +119,9 @@ async function handleResponse(dfStream, audio, queryResult) {
     else {
     	await dfStream.playAudio(audio, 1);
     }
+    // The "end_conversation" flag lets us know whether we should expect
+    // the user to keep speaking after we play or response or whether
+    // the conversation is over and we can close the stream.
     if (queryResult.diagnosticInfo && queryResult.diagnosticInfo["fields"]["end_conversation"]) {
     	return false;
     }
