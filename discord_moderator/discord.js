@@ -42,7 +42,7 @@ async function kickBaddie(user, guild) {
   if (!member) return;
   try {
     await member.kick('Was a jerk');
-  } catch (errr) {
+  } catch (err) {
     console.log(`Could not kick user ${user.username}: ${err}`);
   }
 }
