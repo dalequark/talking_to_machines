@@ -29,7 +29,7 @@ a new GCP project.
 
 2. In your new project, enable the [Perspective Comment Analyzer API](https://console.cloud.google.com/apis/api/commentanalyzer.googleapis.com/overview).
 
-3. Next, in the Google Cloud console left hand menu, click API & Services -> Credentials. On that screen, click "+ Create Credentials" -> "API key". Copy that service account key.
+3. Next, in the Google Cloud console left hand menu, click API & Services -> Credentials. On that screen, click "+ Create Credentials" -> "API key". Copy that API key.
 
 ![](https://storage.googleapis.com/blogstuff/api_credentials.png-04-13-2020_1)
 ![](gs://blogstuff/generate_api_key.png-04-13-2020_0)
